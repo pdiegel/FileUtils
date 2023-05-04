@@ -23,8 +23,12 @@ class RedStakeFile(File):
 
     def __init__(self, file_path: str) -> None:
         super().__init__(file_path)
-        if self.file_type.lower() not in RedStakeFile.file_directories.keys():
+        if (
+            file_path.split(".")[-1].lower()
+            not in RedStakeFile.file_directories.keys()
+        ):
             raise TypeError(f"{self.file_path} is not a valid Red Stake file")
+
         try:
             self.file_number
         except AttributeError as err:
@@ -85,7 +89,7 @@ class RedStakeFile(File):
 
         if isinstance(final_dir_prefix, tuple):
             final_dir = os.path.join(
-                final_dir_prefix,
+                final_dir_prefix[0],
                 f"{self.file_year}{final_dir_prefix[1]}",
                 self.file_month,
             )
@@ -105,42 +109,39 @@ def relocate_files(src_dir: os.path):
 
         try:
             red_stake_file = RedStakeFile(file_path)
-        except (TypeError, AttributeError):
+        except TypeError:
+            continue
+        except AttributeError:
             continue
 
         try:
             final_file_path = os.path.join(
                 red_stake_file.file_destination_dir,
-                f"{file_name}",
+                file_name,
             )
         except AttributeError:
             continue
+        except TypeError:
+            print(
+                f"File {file_name} in {src_dir} has no destination directory"
+            )
+            continue
         else:
+            if os.path.exists(final_file_path):
+                print(f"File {final_file_path} already exists")
+                print(f"Deleting {file_path}")
+                continue
             shutil.move(file_path, final_file_path)
             del red_stake_file
 
 
 if __name__ == "__main__":
-    parsed_dirs = []
-    try:
-        with open("parsed_dirs.txt", "r") as f:
-            parsed_dirs = f.readlines()
-            print("read dirs")
-            for root, dirs, files in os.walk(top=r"C:\Users\redst"):
-                for directory in dirs:
-                    current_dir = os.path.join(root, directory)
-                    if current_dir + "\n" in parsed_dirs:
-                        continue
-                    print(f'Parsing directory "{current_dir}"')
-                    try:
-                        relocate_files(src_dir=current_dir)
-                        parsed_dirs.append(current_dir + "\n")
-                    except PermissionError:
-                        print(f"Permission error at {current_dir}")
-                        continue
-    except TypeError as err:
-        print(f"Critical failure at {current_dir}")
-        print(err)
-
-    with open("parsed_dirs.txt", "w") as f:
-        f.writelines(parsed_dirs)
+    for root, dirs, files in os.walk(top=r"\\server\ascii"):
+        for directory in dirs:
+            current_dir = os.path.join(root, directory)
+            print(f'Parsing directory "{current_dir}"')
+            try:
+                relocate_files(src_dir=current_dir)
+            except PermissionError:
+                print(f"Permission error at {current_dir}")
+                continue

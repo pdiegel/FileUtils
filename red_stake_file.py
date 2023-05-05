@@ -80,6 +80,7 @@ class RedStakeFile(File):
 
     @property
     def file_type(self) -> str:
+        """Returns the file type of the Red Stake file."""
         return self.file_path.split(".")[-1].lower()
 
     @property
@@ -102,46 +103,49 @@ class RedStakeFile(File):
         return None
 
 
-def relocate_files(src_dir: os.path):
-    """Relocates all Red Stake files in the source directory to the server"""
-    for file_name in os.listdir(src_dir):
-        file_path = os.path.join(src_dir, file_name)
+def move_files(source_dir: os.path):
+    """Transfers all Red Stake files from the source directory to the server"""
+    for filename in os.listdir(source_dir):
+        filepath = os.path.join(source_dir, filename)
 
         try:
-            red_stake_file = RedStakeFile(file_path)
-        except TypeError:
-            continue
-        except AttributeError:
+            red_stake_file = RedStakeFile(filepath)
+        except (TypeError, AttributeError):
             continue
 
         try:
-            final_file_path = os.path.join(
+            destination_path = os.path.join(
                 red_stake_file.file_destination_dir,
-                file_name,
+                filename,
             )
         except AttributeError:
             continue
         except TypeError:
             print(
-                f"File {file_name} in {src_dir} has no destination directory"
+                f"File {filename} in {source_dir} has no destination directory"
             )
             continue
         else:
-            if os.path.exists(final_file_path):
-                print(f"File {final_file_path} already exists")
-                print(f"Deleting {file_path}")
+            if os.path.exists(destination_path):
+                print(f"File {destination_path} already exists")
+                # Insert logic to delete or rename file.
                 continue
-            shutil.move(file_path, final_file_path)
+            shutil.move(filepath, destination_path)
             del red_stake_file
 
 
-if __name__ == "__main__":
-    for root, dirs, files in os.walk(top=r"\\server\ascii"):
+def main():
+    directory_to_scan = r"\\server\ascii"
+    for root, dirs, files in os.walk(top=directory_to_scan):
         for directory in dirs:
             current_dir = os.path.join(root, directory)
             print(f'Parsing directory "{current_dir}"')
             try:
-                relocate_files(src_dir=current_dir)
+                move_files(src_dir=current_dir)
             except PermissionError:
                 print(f"Permission error at {current_dir}")
                 continue
+
+
+if __name__ == "__main__":
+    main()

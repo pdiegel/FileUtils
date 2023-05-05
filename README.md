@@ -100,7 +100,7 @@ Returns the destination directory of the Red Stake file. This is the directory t
 
 `print(file.file_destination_dir)  # "\\server\dwg\23dwg\04"`
 
-### relocate_files()
+### move_files()
 
 This function relocates all Red Stake files in the specified source directory to their destination directories on the server.
 

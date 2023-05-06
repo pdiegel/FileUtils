@@ -64,12 +64,9 @@ Returns the file size in bytes. Raises a `FileNotFoundError` if the file does no
 
 `print(len(file))  # 12345`
 
-# RedStakeFile Class
+## RedStakeFile Class
 
 This Python module provides the `RedStakeFile` class, which represents a Red Stake Surveyors file. It is a subclass of the `File` class and provides additional methods and properties for working with Red Stake files.
-
-## Usage
-
 To use this module, simply create an instance of the `RedStakeFile` class, passing in the path to the file as a string argument:
 
 `from redstakefile import RedStakeFile  file = RedStakeFile("C:\\path\\to\\file.dwg")`
